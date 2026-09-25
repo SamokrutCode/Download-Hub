@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⭳ Download Hub</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #050505;
+            --surface: rgba(12, 12, 12, 0.85);
+            --surface2: rgba(20, 20, 20, 0.7);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(255, 255, 255, 0.15);
+            --text: #d4d4d4;
+            --text-dim: #666666;
+            --accent: #e0e0e0;
+            --accent2: #aaaaaa;
+            --accent3: #888888;
+            --glow-purple: rgba(255, 255, 255, 0.05);
+            --glow-pink: rgba(255, 255, 255, 0.03);
+            --glow-cyan: rgba(255, 255, 255, 0.03);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== ANIME BACKGROUND ===== */
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: -3;
+            background: url('bg.jpg') no-repeat center center;
+            background-size: cover;
+            filter: brightness(0.2) saturate(0.7);
+        }
+
+        .bg-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background:
+                linear-gradient(180deg, rgba(5,5,5,0.5) 0%, rgba(5,5,5,0.75) 40%, rgba(5,5,5,0.92) 100%),
+                radial-gradient(ellipse at 20% 50%, var(--glow-purple) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 30%, var(--glow-pink) 0%, transparent 50%);
+        }
+
+        /* ===== FLOATING PARTICLES ===== */
+        .particles {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: floatUp linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes floatUp {
+            0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 0.6; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* ===== SCAN LINE EFFECT ===== */
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(255, 255, 255, 0.012) 2px,
+                rgba(255, 255, 255, 0.012) 4px
+            );
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            padding: 48px 20px 12px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.6rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #ffffff 0%, #b0b0b0 50%, #808080 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 30px var(--glow-purple));
+            margin-bottom: 6px;
+            animation: titlePulse 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes titlePulse {
+            0%   { filter: drop-shadow(0 0 20px var(--glow-purple)); }
+            100% { filter: drop-shadow(0 0 40px var(--glow-pink)); }
+        }
+
+        .header p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            letter-spacing: 2px;
+        }
+
+        /* ===== NEON LINE ===== */
+        .neon-line {
+            width: 200px;
+            height: 2px;
+            margin: 18px auto 0;
+            background: linear-gradient(90deg, transparent, #666, #999, #666, transparent);
+            border-radius: 2px;
+            animation: neonSlide 3s linear infinite;
+            position: relative;
+        }
+
+        .neon-line::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+            filter: blur(6px);
+            border-radius: 2px;
+        }
+
+        @keyframes neonSlide {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* ===== CONTAINER ===== */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ===== STATS BAR ===== */
+        .stats-bar {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 20px;
+            padding: 14px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            backdrop-filter: blur(20px);
+            flex-wrap: wrap;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .stat-label { font-size: 0.78rem; color: var(--text-dim); }
+
+        .ie-buttons { display: flex; gap: 8px; }
+
+        .stat-item { display: flex; align-items: center; gap: 8px; }
+
+        /* ===== TOOLBAR ===== */
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            color: var(--text);
+            font-size: 0.95rem;
+            outline: none;
+            backdrop-filter: blur(20px);
+            transition: all 0.4s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255,255,255,0.05), inset 0 0 10px rgba(255,255,255,0.02);
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 11px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                4px 4px 10px rgba(0, 0, 0, 0.4), 
+                -2px -2px 6px rgba(255, 255, 255, 0.03),
+                inset 1px 1px 2px rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(24px) saturate(120%);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 
+                inset 3px 3px 8px rgba(0, 0, 0, 0.6), 
+                inset -2px -2px 6px rgba(255, 255, 255, 0.05);
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.03);
+            color: #e0e0e0;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+            color: var(--text-dim);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 
+                2px 2px 8px rgba(0, 0, 0, 0.3), 
+                -1px -1px 4px rgba(255, 255, 255, 0.02),
+                inset 1px 1px 1px rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(24px) saturate(120%);
+        }
+
+        .btn-secondary:hover {
+            color: #fff;
+            box-shadow: 
+                inset 2px 2px 6px rgba(0, 0, 0, 0.5), 
+                inset -1px -1px 4px rgba(255, 255, 255, 0.02);
+            background: rgba(255,255,255,0.02);
+            border-color: rgba(255,255,255,0.03);
+        }
+
+        /* ===== CATEGORY TABS ===== */
+        .categories {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+        }
+
+        .cat-tab {
+            padding: 7px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 0.83rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            user-select: none;
+            backdrop-filter: blur(15px);
+        }
+
+        .cat-tab:hover {
+            border-color: var(--accent);
+            color: var(--text);
+            box-shadow: 0 0 12px var(--glow-purple);
+        }
+
+        .cat-tab.active {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .cat-tab .count {
+            background: rgba(255,255,255,0.2);
+            padding: 1px 7px;
+            border-radius: 10px;
+            font-size: 0.72rem;
+            margin-left: 4px;
+        }
+
+        /* ===== GRID ===== */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 16px;
+        }
+
+        /* ===== CARD ===== */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px;
+            backdrop-filter: blur(25px);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            animation: cardIn 0.5s ease both;
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-5px);
+            box-shadow:
+                0 12px 40px rgba(0,0,0,0.4),
+                0 0 30px var(--glow-purple),
+                inset 0 0 30px rgba(255,255,255,0.02);
+        }
+
+        /* Top glow bar on hover */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .card:hover::before { opacity: 1; }
+
+        /* Corner decorations */
+        .card::after {
+            content: '';
+            position: absolute;
+            bottom: -30px; right: -30px;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--glow-purple) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .card:hover::after { opacity: 0.5; }
+
+        .card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            
+            /* High-Matte Light Glassmorphism */
+            background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+            backdrop-filter: blur(24px) saturate(120%);
+            -webkit-backdrop-filter: blur(24px) saturate(120%);
+            border: 1px solid rgba(255,255,255,0.4);
+            box-shadow: 
+                6px 6px 15px rgba(0, 0, 0, 0.6), 
+                inset 2px 2px 5px rgba(255, 255, 255, 0.6),
+                inset -2px -2px 5px rgba(0, 0, 0, 0.1);
+            color: #111; /* Dark icon inside light glass */
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+
+        .card-actions { display: flex; gap: 4px; }
+
+        .card-actions button {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.25s;
+        }
+
+        .card-actions button:hover {
+            color: var(--text);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .card-actions button.del:hover { color: #cc4444; }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .card-desc {
+            color: var(--text-dim);
+            font-size: 0.83rem;
+            margin-bottom: 14px;
+            line-height: 1.45;
+        }
+
+        .card-meta {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-size: 0.73rem;
+            font-weight: 500;
+            background: rgba(255,255,255,0.03);
+            color: var(--text-dim);
+            border: 1px solid rgba(255,255,255,0.04);
+            box-shadow: inset 1px 1px 2px rgba(255,255,255,0.03);
+        }
+
+        .tag.cat {
+            background: rgba(255,255,255,0.06);
+            color: var(--text);
+        }
+
+        /* ===== DOWNLOAD BUTTON (Glassmorphism) ===== */
+        .card-download {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+            
+            /* Glassmorphism Styles */
+            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+            backdrop-filter: blur(24px) saturate(120%);
+            -webkit-backdrop-filter: blur(24px) saturate(120%);
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 
+                4px 4px 10px rgba(0, 0, 0, 0.4), 
+                -2px -2px 6px rgba(255, 255, 255, 0.03),
+                inset 1px 1px 2px rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .card-download:hover {
+            /* Pressed effect for Glassmorphism */
+            box-shadow: 
+                inset 3px 3px 8px rgba(0, 0, 0, 0.6), 
+                inset -2px -2px 6px rgba(255, 255, 255, 0.03);
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.02);
+            color: #ccc;
+        }
+
+        .card-download:active {
+            transform: scale(0.98);
+        }
+
+
+        .card-download.placeholder {
+            background: var(--surface2);
+            border: 1px dashed var(--border);
+            box-shadow: none;
+            color: var(--text-dim);
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-dim);
+        }
+
+        .empty-state .icon { font-size: 4rem; margin-bottom: 16px; }
+
+        .empty-state h3 { font-size: 1.3rem; margin-bottom: 8px; color: var(--text); }
+
+        /* ===== MODALS ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .modal {
+            background: rgba(15,15,15,0.95);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 32px;
+            width: 100%;
+            max-width: 500px;
+            animation: modalIn 0.35s ease;
+            backdrop-filter: blur(30px);
+            box-shadow: 0 25px 80px rgba(0,0,0,0.6);
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.88) translateY(30px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal h2 {
+            font-size: 1.3rem;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group { margin-bottom: 14px; }
+
+        .form-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-dim);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(10,10,10,0.8);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--glow-purple);
+        }
+
+        .form-group textarea { resize: vertical; min-height: 55px; }
+        .form-group select option { background: #0f0f0f; }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .modal-buttons .btn { flex: 1; justify-content: center; }
+
+        /* ===== CATEGORY MANAGER ===== */
+        .cat-manager { margin-top: 14px; }
+
+        .cat-manager .cat-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+        .cat-manager .cat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            background: var(--surface2);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+        }
+
+        .cat-manager .cat-item .remove-cat {
+            background: none; border: none; color: #cc4444; cursor: pointer; font-size: 0.8rem; padding: 0 2px;
+        }
+
+        .add-cat-row { display: flex; gap: 8px; margin-top: 8px; }
+
+        .add-cat-row input {
+            flex: 1; padding: 8px 12px; background: rgba(7,6,14,0.8); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.85rem; outline: none; font-family: inherit;
+        }
+
+        .add-cat-row button {
+            padding: 8px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 600; font-family: inherit;
+        }
+
+        /* ===== ICON PICKER ===== */
+        .icon-picker { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .icon-option {
+            width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.25s;
+            background: rgba(10,10,10,0.6);
+        }
+
+        .icon-option:hover { border-color: var(--accent); box-shadow: 0 0 12px var(--glow-purple); }
+
+        .icon-option.selected { border-color: var(--accent); background: rgba(255,255,255,0.08); box-shadow: 0 0 12px rgba(255,255,255,0.05); }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 30px; right: 30px;
+            padding: 14px 24px;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 2000;
+            animation: toastIn 0.35s ease;
+            color: white;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .toast.success { background: rgba(0,200,150,0.85); box-shadow: 0 5px 25px rgba(0,200,150,0.3); }
+        .toast.error   { background: rgba(255,74,106,0.85); box-shadow: 0 5px 25px rgba(255,74,106,0.3); }
+        .toast.info    { background: rgba(80,80,80,0.9); box-shadow: 0 5px 25px rgba(0,0,0,0.3); }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.9); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* ===== AUTH & USER UI ===== */
+        .auth-bar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(15,15,15,0.8);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(24px) saturate(120%);
+        }
+
+        .user-role {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .role-admin { background: #e0e0e0; color: #000; }
+        .role-vip { background: #a0a0a0; color: #000; }
+        .role-user { background: #444; color: #fff; }
+
+        .auth-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .auth-toggle-btn {
+            flex: 1;
+            padding: 8px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid var(--border);
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .auth-toggle-btn.active {
+            color: var(--text);
+            border-color: var(--accent);
+        }
+
+        .tag.vip {
+            border-color: #d4d4d4;
+            color: #fff;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .hidden { display: none !important; }
+
+        /* ===== MAIN VIEW TABS ===== */
+        .view-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+
+        .view-tab {
+            padding: 12px 24px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-dim);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-tab:hover {
+            color: var(--text);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .view-tab.active {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        /* ===== PROFILE & ADMIN VIEWS ===== */
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(20px);
+        }
+
+        .panel-card h2 { margin-bottom: 15px; color: #fff; }
+        .panel-card h3 { margin-bottom: 10px; color: #fff; font-size: 1.1rem; margin-top: 20px; }
+        .panel-card p { color: var(--text-dim); margin-bottom: 10px; }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .admin-table th, .admin-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .admin-table th { color: var(--text); font-weight: 600; background: rgba(255,255,255,0.05); }
+        .admin-table select { background: #111; color: #fff; border: 1px solid var(--border); padding: 5px; border-radius: 5px; }
+
+        .btn-fav {
+            background: none; border: none; font-size: 1.2rem; cursor: pointer; transition: transform 0.2s;
+            filter: grayscale(1);
+        }
+        .btn-fav.active { filter: grayscale(0); transform: scale(1.1); }
+        .btn-fav:hover { transform: scale(1.2); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.6rem; letter-spacing: 2px; }
+            .grid { grid-template-columns: 1fr; }
+            .toolbar { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Background layers -->
+<div class="bg-layer"></div>
+<div class="bg-overlay"></div>
+<div class="scanlines"></div>
+
+<!-- Floating particles (generated via JS) -->
+<div class="particles" id="particles"></div>
+
+<!-- Auth Bar -->
+<div class="auth-bar" id="authBar">
+    <div id="loggedOutView">
+        <button class="btn btn-secondary" onclick="openAuthModal('login')">Войти</button>
+        <button class="btn btn-primary" onclick="openAuthModal('register')">Регистрация</button>
+    </div>
+    <div id="loggedInView" class="hidden user-profile">
+        <span id="userNameDisplay">User</span>
+        <span id="userRoleDisplay" class="user-role role-user">User</span>
+        <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="switchMainView('profile')" id="btnOpenProfile">⚲ Кабинет</button>
+        <button class="btn btn-secondary hidden" style="padding: 4px 8px; font-size: 0.75rem;" onclick="switchMainView('downloads')" id="btnHome">⌂ На главную</button>
+        <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="logout()">Выйти</button>
+    </div>
+</div>
+
+<div class="header">
+    <h1>Download Hub</h1>
+    <p>ダウンロード・ハブ — твой портал загрузок</p>
+    <div class="neon-line"></div>
+</div>
+
+<div class="container">
+    <!-- View Tabs -->
+    <div class="view-tabs">
+        <div class="view-tab active" id="tabDownloads" onclick="switchMainView('downloads')">⭳ Загрузки</div>
+        <div class="view-tab" id="tabLinks" onclick="switchMainView('links')">⚯ Полезные ссылки</div>
+    </div>
+
+    <div id="mainContentView">
+    <!-- Stats -->
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div>
+                <div class="stat-value" id="totalCount">0</div>
+                <div class="stat-label">Файлов</div>
+            </div>
+        </div>
+        <div class="stat-item">
+            <div>
+                <div class="stat-value" id="catCount">0</div>
+                <div class="stat-label">Категорий</div>
+            </div>
+        </div>
+        <div class="stat-item" style="margin-left: auto;">
+            <div class="ie-buttons">
+                <button class="btn btn-secondary" onclick="exportData()">⭱ Экспорт</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">⭳ Импорт</button>
+                <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+            </div>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Поиск..." oninput="renderItems()">
+        </div>
+        <button class="btn btn-secondary hidden" id="btnAdminCats" onclick="openCatModal()">⎗ Категории</button>
+        <button class="btn btn-primary hidden" id="btnAdminAdd" onclick="openAddModal()">＋ Добавить</button>
+    </div>
+
+    <!-- Category tabs -->
+    <div class="categories" id="catTabs"></div>
+
+    <!-- Grid -->
+    <div class="grid" id="itemsGrid"></div>
+
+    <!-- Empty state -->
+    <div class="empty-state" id="emptyState" style="display:none;">
+        <div class="icon">⛋</div>
+        <h3>Пока пусто</h3>
+        <p>Нажми «Добавить», чтобы добавить первую загрузку</p>
+    </div>
+    </div> <!-- mainContentView End -->
+
+    <!-- Profile View -->
+    <div id="profileView" class="hidden">
+        <div class="panel-card">
+            <h2>⚲ Личный кабинет</h2>
+            <p>Привет, <b id="profileUsername"></b>!</p>
+            <p>Твоя роль: <span id="profileRoleBadge" class="user-role"></span></p>
+            
+            <h3 style="margin-top:20px;margin-bottom:10px;font-size:1.1rem;color:#fff;">Смена пароля</h3>
+            <div style="display:flex; gap:10px; max-width:300px;">
+                <input type="password" id="newPassword" placeholder="Новый пароль" style="flex:1; padding:10px; background:rgba(10,10,10,0.8); border:1px solid var(--border); border-radius:10px; color:#fff;">
+                <button class="btn btn-primary" onclick="changePassword()">Изменить</button>
+            </div>
+        </div>
+        <h3 style="color:#fff; margin-bottom:15px; margin-left: 5px;">★ Моё избранное</h3>
+        <div class="grid" id="favoritesGrid"></div>
+        <div class="empty-state" id="favoritesEmpty" style="display:none;">
+            <h3>Пока нет избранного</h3>
+            <p>Нажимай на звёздочку возле файлов/ссылок, чтобы добавить их сюда</p>
+        <!-- Admin Panel (Inside Profile) -->
+        <div class="panel-card hidden" id="adminPanelInsideProfile" style="margin-top: 30px;">
+            <h2>⚙ Управление пользователями</h2>
+            <p style="color:var(--text-dim); margin-bottom:15px;">Изменяй роли или удаляй аккаунты.</p>
+            <div style="overflow-x:auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Логин</th>
+                            <th>Текущая роль</th>
+                            <th>Сменить роль</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminUsersList"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="authModal">
+    <div class="modal">
+        <div class="auth-toggle">
+            <button class="auth-toggle-btn active" id="tabLogin" onclick="switchAuthTab('login')">Вход</button>
+            <button class="auth-toggle-btn" id="tabRegister" onclick="switchAuthTab('register')">Регистрация</button>
+        </div>
+        <h2 id="authTitle">Вход</h2>
+        <div class="form-group">
+            <label>Имя пользователя</label>
+            <input type="text" id="authUsername" placeholder="Логин">
+        </div>
+        <div class="form-group">
+            <label>Пароль</label>
+            <input type="password" id="authPassword" placeholder="Пароль">
+        </div>
+        <div class="form-group hidden" id="authRoleGroup">
+            <label>Роль (для демо)</label>
+            <select id="authRole">
+                <option value="User">User</option>
+                <option value="VIP">VIP</option>
+                <option value="Admin">Admin</option>
+            </select>
+            <small style="color:var(--text-dim);font-size:0.7rem;">(Обычно роль выдаёт админ, но тут можно выбрать)</small>
+        </div>
+        <div class="modal-buttons">
+            <button class="btn btn-secondary" onclick="closeAuthModal()">Отмена</button>
+            <button class="btn btn-primary" id="authSubmitBtn" onclick="submitAuth()">Войти</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal">
+        <h2 id="modalTitle">＋ Новая загрузка</h2>
+        <div class="form-group">
+            <label>Название *</label>
+            <input type="text" id="itemName" placeholder="Например: Steam">
+        </div>
+        <div class="form-group">
+            <label>Ссылка для скачивания *</label>
+            <input type="url" id="itemUrl" placeholder="https://...прямая ссылка на файл">
+        </div>
+        <div class="form-group">
+            <label>Описание</label>
+            <textarea id="itemDesc" placeholder="Краткое описание..."></textarea>
+        </div>
+        <div class="form-group" id="fgCat">
+            <label>Категория</label>
+            <select id="itemCat"></select>
+        </div>
+        <div class="form-group" id="fgSize">
+            <label>Размер файла</label>
+            <input type="text" id="itemSize" placeholder="Например: 85 MB">
+        </div>
+        <div class="form-group">
+            <label>Иконка (выберите или вставьте ссылку на картинку)</label>
+            <div class="icon-picker" id="iconPicker"></div>
+            <input type="text" id="customIcon" placeholder="Например: https://site.com/icon.png" style="margin-top:8px;" oninput="selectedIcon=''; document.querySelectorAll('.icon-option').forEach(e => e.classList.remove('selected'));">
+        </div>
+        <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="itemVip" style="width:auto; margin:0;">
+            <label style="margin:0;">Только для VIP пользователей</label>
+        </div>
+        <input type="hidden" id="editId" value="">
+        <div class="modal-buttons">
+            <button class="btn btn-secondary" onclick="closeAddModal()">Отмена</button>
+            <button class="btn btn-primary" onclick="saveItem()">✓ Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<!-- Category Manager Modal -->
+<div class="modal-overlay" id="catModal">
+    <div class="modal">
+        <h2>⎗ Управление категориями</h2>
+        <div class="cat-manager">
+            <div class="cat-list" id="catList"></div>
+            <div class="add-cat-row">
+                <input type="text" id="newCatName" placeholder="Новая категория...">
+                <button onclick="addCategory()">Добавить</button>
+            </div>
+        </div>
+        <div class="modal-buttons" style="margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="closeCatModal()">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===== PARTICLES =====
+    (function() {
+        const container = document.getElementById('particles');
+        const colors = ['rgba(255,255,255,0.3)', 'rgba(255,255,255,0.15)', 'rgba(200,200,200,0.2)', 'rgba(150,150,150,0.15)'];
+        for (let i = 0; i < 35; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            const size = Math.random() * 4 + 1;
+            p.style.width = size + 'px';
+            p.style.height = size + 'px';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            p.style.boxShadow = `0 0 ${size * 3}px ${p.style.background}`;
+            p.style.animationDuration = (Math.random() * 15 + 10) + 's';
+            p.style.animationDelay = (Math.random() * 15) + 's';
+            container.appendChild(p);
+        }
+    })();
+
+    // ===== DATA =====
+    const ICONS = ['⛋','▤','◈','◉','◍','◎','●','◐','◑','◒','◓','★','☆','✦','✧','⚲','⚙','⌂','⚯','⎗'];
+
+    const DEFAULT_DATA = {
+        categories: ['Программы', 'Игры', 'Медиа', 'Мессенджеры', 'Утилиты', 'Другое'],
+        items: [
+            {
+                id: 'item_steam',
+                name: 'Steam',
+                url: 'https://cdn.fastly.steamstatic.com/client/installer/SteamSetup.exe',
+                description: 'Игровая платформа — магазин игр, друзья, мастерская.',
+                category: 'Игры',
+                size: '~3 MB',
+                icon: '◈',
+                addedAt: new Date().toISOString()
+            },
+            {
+                id: 'item_ayugram',
+                name: 'AyuGram Desktop',
+                url: 'https://github.com/AyuGram/AyuGramDesktop/releases/download/v7.0.9/AyuGram.zip',
+                description: 'Мод Telegram Desktop с доп. функциями. Windows Portable.',
+                category: 'Мессенджеры',
+                size: '~71 MB',
+                icon: '💬',
+                addedAt: new Date().toISOString()
+            },
+            {
+                id: 'item_dotify',
+                name: 'Dotify',
+                url: '#ВСТАВЬ_ССЫЛКУ_DOTIFY',
+                description: 'Программа для музыки — ссылку нужно обновить!',
+                category: 'Медиа',
+                size: '',
+                icon: '◉',
+                addedAt: new Date().toISOString()
+            },
+            {
+                id: 'item_tgwsproxy',
+                name: 'TG WS PROXY',
+                url: '#ВСТАВЬ_ССЫЛКУ_TG_WS_PROXY',
+                description: 'WebSocket прокси для Telegram — ссылку нужно обновить!',
+                category: 'Утилиты',
+                size: '',
+                icon: '◨',
+                addedAt: new Date().toISOString()
+            }
+        ],
+        links: []
+    };
+
+    const DATA_VERSION = 'v3_anime';
+    const storedVersion = localStorage.getItem('downloadHubVersion');
+    let data;
+
+    if (storedVersion !== DATA_VERSION) {
+        data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        localStorage.setItem('downloadHub', JSON.stringify(data));
+        localStorage.setItem('downloadHubVersion', DATA_VERSION);
+    } else {
+        data = JSON.parse(localStorage.getItem('downloadHub') || 'null') || JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+    if (!data.links) data.links = [];
+
+    // ===== AUTH DATA =====
+    const DEFAULT_USERS = [
+        { username: 'admin', password: '123', role: 'Admin', favorites: [] },
+        { username: 'vip', password: '123', role: 'VIP', favorites: [] },
+        { username: 'user', password: '123', role: 'User', favorites: [] }
+    ];
+    let authData = JSON.parse(localStorage.getItem('downloadHubAuth') || 'null');
+    if (!authData) {
+        authData = { users: DEFAULT_USERS, currentUser: null };
+        localStorage.setItem('downloadHubAuth', JSON.stringify(authData));
+    }
+    
+    // Migrate existing users to have favorites
+    authData.users.forEach(u => { if (!u.favorites) u.favorites = []; });
+    if (authData.currentUser && !authData.currentUser.favorites) authData.currentUser.favorites = [];
+
+    function saveAuth() {
+        // Also update currentUser in the array
+        if (authData.currentUser) {
+            const idx = authData.users.findIndex(u => u.username === authData.currentUser.username);
+            if (idx !== -1) authData.users[idx] = authData.currentUser;
+        }
+        localStorage.setItem('downloadHubAuth', JSON.stringify(authData));
+    }
+
+    // Auth state variables
+    let isLogged = !!authData.currentUser;
+    let myRole = authData.currentUser ? authData.currentUser.role : null;
+    let authMode = 'login'; // 'login' or 'register'
+    let currentView = 'downloads'; // 'downloads' or 'links'
+
+    let activeCategory = 'all';
+    let selectedIcon = '⛋';
+
+    function save() {
+        localStorage.setItem('downloadHub', JSON.stringify(data));
+    }
+
+    // ===== RENDER =====
+    function renderCategories() {
+        const tabs = document.getElementById('catTabs');
+        const allCount = data.items.length;
+        let html = `<div class="cat-tab ${activeCategory === 'all' ? 'active' : ''}" onclick="setCategory('all')">Все <span class="count">${allCount}</span></div>`;
+        data.categories.forEach(cat => {
+            const count = data.items.filter(i => i.category === cat).length;
+            html += `<div class="cat-tab ${activeCategory === cat ? 'active' : ''}" onclick="setCategory('${cat.replace(/'/g,"\\'")}')">${cat} <span class="count">${count}</span></div>`;
+        });
+        tabs.innerHTML = html;
+        document.getElementById('catCount').textContent = data.categories.length;
+    }
+
+    function switchMainView(view) {
+        currentView = view;
+        
+        document.getElementById('tabDownloads').classList.toggle('active', view === 'downloads');
+        document.getElementById('tabLinks').classList.toggle('active', view === 'links');
+        
+        const mainContent = document.getElementById('mainContentView');
+        const profileContent = document.getElementById('profileView');
+
+        mainContent.classList.toggle('hidden', view === 'profile');
+        profileContent.classList.toggle('hidden', view !== 'profile');
+        
+        const catTabs = document.getElementById('catTabs');
+        if (view === 'downloads') {
+            catTabs.classList.remove('hidden');
+        } else {
+            catTabs.classList.add('hidden');
+        }
+        
+        // Show/hide home button vs profile button
+        if (isLogged) {
+            document.getElementById('btnHome').classList.toggle('hidden', view !== 'profile');
+            document.getElementById('btnOpenProfile').classList.toggle('hidden', view === 'profile');
+        }
+
+        if (view === 'downloads' || view === 'links') renderItems();
+        if (view === 'profile') {
+            renderProfile();
+            if (myRole === 'Admin') renderAdmin();
+        }
+    }
+
+    function renderItems() {
+        const grid = document.getElementById('itemsGrid');
+        const empty = document.getElementById('emptyState');
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const isAdmin = myRole === 'Admin';
+
+        let sourceArray = currentView === 'downloads' ? data.items : data.links;
+        let items = sourceArray;
+        
+        if (currentView === 'downloads' && activeCategory !== 'all') {
+            items = items.filter(i => i.category === activeCategory);
+        }
+        if (search) {
+            items = items.filter(i => i.name.toLowerCase().includes(search) || (i.description || '').toLowerCase().includes(search));
+        }
+
+        document.getElementById('totalCount').textContent = sourceArray.length;
+
+        if (items.length === 0) {
+            grid.innerHTML = '';
+            empty.style.display = 'block';
+            return;
+        }
+
+        empty.style.display = 'none';
+        grid.innerHTML = items.map((item, idx) => generateCardHtml(item, idx, currentView === 'links')).join('');
+    }
+
+    function generateCardHtml(item, idx, isLink) {
+        const isPlaceholder = item.url.startsWith('#');
+        const isAdmin = myRole === 'Admin';
+        
+        let favHtml = '';
+        if (isLogged) {
+            const isFav = authData.currentUser.favorites && authData.currentUser.favorites.includes(item.id);
+            favHtml = `<button class="btn-fav ${isFav ? 'active' : ''}" title="Избранное" onclick="toggleFavorite('${item.id}')">★</button>`;
+        }
+
+        const adminActions = isAdmin ? `
+            <div class="card-actions">
+                ${favHtml}
+                <button title="Редактировать" onclick="editItem('${item.id}', ${isLink})">✎</button>
+                <button class="del" title="Удалить" onclick="deleteItem('${item.id}', ${isLink})">✕</button>
+            </div>
+        ` : (isLogged ? `<div class="card-actions">${favHtml}</div>` : '');
+        
+        const iconHtml = (item.icon && (item.icon.startsWith('http') || item.icon.startsWith('data:') || item.icon.startsWith('/') || item.icon.startsWith('assets/'))) 
+            ? `<img src="${escHtml(item.icon)}" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">`
+            : (item.icon || (isLink ? '⚯' : '⛋'));
+
+        const buttonHtml = isLink 
+            ? `<button class="card-download" onclick="window.open('${escHtml(item.url)}', '_blank')">⚯ Перейти</button>`
+            : `<button class="card-download ${isPlaceholder ? 'placeholder' : ''}" onclick="downloadFile('${item.id}')">
+                ${isPlaceholder ? '⚠ Нужна ссылка' : '⭳ Скачать'}
+               </button>`;
+
+        return `
+        <div class="card" style="animation-delay: ${idx * 0.08}s">
+            <div class="card-top">
+                <div class="card-icon">${iconHtml}</div>
+                ${adminActions}
+            </div>
+            <div class="card-title">${escHtml(item.name)}</div>
+            <div class="card-desc">${escHtml(item.description || 'Нет описания')}</div>
+            <div class="card-meta">
+                ${!isLink ? `<span class="tag cat">${escHtml(item.category || '')}</span>` : ''}
+                ${item.size && !isLink ? `<span class="tag">${escHtml(item.size)}</span>` : ''}
+                ${item.isVip ? `<span class="tag vip">★ VIP</span>` : ''}
+            </div>
+            ${buttonHtml}
+        </div>`;
+    }
+
+    function setCategory(cat) {
+        activeCategory = cat;
+        renderCategories();
+        renderItems();
+    }
+
+    // ===== DIRECT DOWNLOAD =====
+    function downloadFile(id) {
+        const item = data.items.find(i => i.id === id);
+        if (!item) return;
+
+        if (item.url.startsWith('#')) {
+            toast('Сначала укажи ссылку! Нажми ✎', 'error');
+            return;
+        }
+
+        if (!isLogged) {
+            toast('Для скачивания нужно войти!', 'error');
+            openAuthModal('login');
+            return;
+        }
+
+        if (item.isVip && myRole !== 'VIP' && myRole !== 'Admin') {
+            toast('Этот файл доступен только для VIP!', 'error');
+            return;
+        }
+
+        // Create invisible link and force download
+        const a = document.createElement('a');
+        a.href = item.url;
+        a.download = item.url.split('/').pop() || item.name;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        toast(`Скачивание: ${item.name} ⭳`, 'success');
+    }
+
+    // ===== AUTHENTICATION =====
+    function updateAuthUI() {
+        const loggedOutView = document.getElementById('loggedOutView');
+        const loggedInView = document.getElementById('loggedInView');
+        const adminCats = document.getElementById('btnAdminCats');
+        const adminAdd = document.getElementById('btnAdminAdd');
+        const adminPanel = document.getElementById('adminPanelInsideProfile');
+
+        if (isLogged) {
+            loggedOutView.classList.add('hidden');
+            loggedInView.classList.remove('hidden');
+            document.getElementById('userNameDisplay').textContent = authData.currentUser.username;
+            document.getElementById('profileUsername').textContent = authData.currentUser.username;
+            
+            const roleEl = document.getElementById('userRoleDisplay');
+            roleEl.textContent = myRole;
+            roleEl.className = 'user-role role-' + myRole.toLowerCase();
+            
+            const profileRoleEl = document.getElementById('profileRoleBadge');
+            profileRoleEl.textContent = myRole;
+            profileRoleEl.className = 'user-role role-' + myRole.toLowerCase();
+
+            if (myRole === 'Admin') {
+                adminCats.classList.remove('hidden');
+                adminAdd.classList.remove('hidden');
+                adminPanel.classList.remove('hidden');
+            } else {
+                adminCats.classList.add('hidden');
+                adminAdd.classList.add('hidden');
+                adminPanel.classList.add('hidden');
+            }
+        } else {
+            loggedOutView.classList.remove('hidden');
+            loggedInView.classList.add('hidden');
+            adminCats.classList.add('hidden');
+            adminAdd.classList.add('hidden');
+            adminPanel.classList.add('hidden');
+            
+            if (currentView === 'profile') {
+                switchMainView('downloads');
+            }
+        }
+        
+        // Ensure home/profile buttons are synced
+        if (isLogged) {
+            document.getElementById('btnHome').classList.toggle('hidden', currentView !== 'profile');
+            document.getElementById('btnOpenProfile').classList.toggle('hidden', currentView === 'profile');
+        }
+        
+        renderItems();
+        if (currentView === 'profile') {
+            renderProfile();
+            if (myRole === 'Admin') renderAdmin();
+        }
+    }
+
+    // ===== PROFILE & FAVORITES LOGIC =====
+    function renderProfile() {
+        if (!isLogged) return;
+        const favGrid = document.getElementById('favoritesGrid');
+        const empty = document.getElementById('favoritesEmpty');
+        const favIds = authData.currentUser.favorites || [];
+        
+        let allItems = [...data.items, ...data.links];
+        let favItems = allItems.filter(i => favIds.includes(i.id));
+        
+        if (favItems.length === 0) {
+            favGrid.innerHTML = '';
+            empty.style.display = 'block';
+        } else {
+            empty.style.display = 'none';
+            favGrid.innerHTML = favItems.map((item, idx) => {
+                const isLink = data.links.some(l => l.id === item.id);
+                return generateCardHtml(item, idx, isLink);
+            }).join('');
+        }
+    }
+
+    function toggleFavorite(id) {
+        if (!isLogged) { toast('Войдите, чтобы добавлять в избранное', 'error'); return; }
+        let favs = authData.currentUser.favorites;
+        if (favs.includes(id)) {
+            authData.currentUser.favorites = favs.filter(x => x !== id);
+            toast('Удалено из избранного', 'info');
+        } else {
+            authData.currentUser.favorites.push(id);
+            toast('Добавлено в избранное ★', 'success');
+        }
+        saveAuth();
+        if (currentView === 'profile') renderProfile();
+        else renderItems();
+    }
+
+    function changePassword() {
+        const inp = document.getElementById('newPassword');
+        const np = inp.value.trim();
+        if (!np) { toast('Введите новый пароль', 'error'); return; }
+        authData.currentUser.password = np;
+        saveAuth();
+        inp.value = '';
+        toast('Пароль успешно изменен!', 'success');
+    }
+
+    // ===== ADMIN PANEL LOGIC =====
+    function renderAdmin() {
+        if (myRole !== 'Admin') return;
+        const tbody = document.getElementById('adminUsersList');
+        tbody.innerHTML = authData.users.map(u => `
+            <tr>
+                <td><b>${escHtml(u.username)}</b> ${u.username === authData.currentUser.username ? '(Вы)' : ''}</td>
+                <td><span class="user-role role-${u.role.toLowerCase()}">${u.role}</span></td>
+                <td>
+                    <select onchange="changeUserRole('${escHtml(u.username)}', this.value)" ${u.username === authData.currentUser.username ? 'disabled' : ''}>
+                        <option value="User" ${u.role === 'User' ? 'selected' : ''}>User</option>
+                        <option value="VIP" ${u.role === 'VIP' ? 'selected' : ''}>VIP</option>
+                        <option value="Admin" ${u.role === 'Admin' ? 'selected' : ''}>Admin</option>
+                    </select>
+                </td>
+                <td>
+                    <button class="btn btn-secondary" style="color:#ff4a6a; padding:4px 8px;" onclick="deleteUser('${escHtml(u.username)}')" ${u.username === authData.currentUser.username ? 'disabled' : ''}>✕ Удалить</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function changeUserRole(username, newRole) {
+        const user = authData.users.find(u => u.username === username);
+        if (user) {
+            user.role = newRole;
+            saveAuth();
+            toast(`Роль пользователя ${username} изменена на ${newRole}`, 'success');
+            renderAdmin();
+        }
+    }
+
+    function deleteUser(username) {
+        if (username === authData.currentUser.username) return;
+        if (!confirm(`Точно удалить пользователя ${username}?`)) return;
+        authData.users = authData.users.filter(u => u.username !== username);
+        saveAuth();
+        toast('Пользователь удален', 'info');
+        renderAdmin();
+    }
+
+    function openAuthModal(mode) {
+        switchAuthTab(mode);
+        document.getElementById('authUsername').value = '';
+        document.getElementById('authPassword').value = '';
+        document.getElementById('authModal').classList.add('open');
+    }
+
+    function closeAuthModal() {
+        document.getElementById('authModal').classList.remove('open');
+    }
+
+    function switchAuthTab(mode) {
+        authMode = mode;
+        document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
+        document.getElementById('tabRegister').classList.toggle('active', mode === 'register');
+        document.getElementById('authTitle').textContent = mode === 'login' ? 'Вход' : 'Регистрация';
+        document.getElementById('authSubmitBtn').textContent = mode === 'login' ? 'Войти' : 'Создать аккаунт';
+        document.getElementById('authRoleGroup').classList.toggle('hidden', mode === 'login');
+    }
+
+    function submitAuth() {
+        const u = document.getElementById('authUsername').value.trim();
+        const p = document.getElementById('authPassword').value.trim();
+        if (!u || !p) { toast('Заполните все поля!', 'error'); return; }
+
+        if (authMode === 'login') {
+            const user = authData.users.find(x => x.username === u && x.password === p);
+            if (user) {
+                authData.currentUser = user;
+                isLogged = true;
+                myRole = user.role;
+                saveAuth();
+                updateAuthUI();
+                closeAuthModal();
+                toast('Вы вошли как ' + u, 'success');
+            } else {
+                toast('Неверный логин или пароль', 'error');
+            }
+        } else {
+            if (authData.users.find(x => x.username === u)) {
+                toast('Такой пользователь уже есть', 'error');
+                return;
+            }
+            const r = document.getElementById('authRole').value;
+            const newUser = { username: u, password: p, role: r };
+            authData.users.push(newUser);
+            authData.currentUser = newUser;
+            isLogged = true;
+            myRole = r;
+            saveAuth();
+            updateAuthUI();
+            closeAuthModal();
+            toast('Регистрация успешна!', 'success');
+        }
+    }
+
+    function logout() {
+        authData.currentUser = null;
+        isLogged = false;
+        myRole = null;
+        saveAuth();
+        updateAuthUI();
+        toast('Вы вышли из аккаунта', 'info');
+    }
+
+    // ===== MODALS =====
+    function openAddModal() {
+        const isLink = currentView === 'links';
+        document.getElementById('modalTitle').textContent = isLink ? '＋ Новая ссылка' : '＋ Новая загрузка';
+        document.getElementById('fgCat').classList.toggle('hidden', isLink);
+        document.getElementById('fgSize').classList.toggle('hidden', isLink);
+        
+        document.getElementById('itemName').value = '';
+        document.getElementById('itemUrl').value = '';
+        document.getElementById('itemDesc').value = '';
+        document.getElementById('itemSize').value = '';
+        document.getElementById('itemVip').checked = false;
+        document.getElementById('editId').value = '';
+        document.getElementById('customIcon').value = '';
+        selectedIcon = isLink ? '⚯' : '⛋';
+        populateCatSelect();
+        renderIconPicker();
+        document.getElementById('addModal').classList.add('open');
+    }
+
+    function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
+
+    function openCatModal() {
+        renderCatManager();
+        document.getElementById('catModal').classList.add('open');
+    }
+
+    function closeCatModal() { document.getElementById('catModal').classList.remove('open'); }
+
+    function populateCatSelect() {
+        document.getElementById('itemCat').innerHTML = data.categories.map(c => `<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('');
+    }
+
+    function renderIconPicker() {
+        document.getElementById('iconPicker').innerHTML = ICONS.map(ic => {
+            const isImg = ic.startsWith('assets/');
+            const content = isImg ? `<img src="${ic}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;">` : ic;
+            return `<div class="icon-option ${ic === selectedIcon ? 'selected' : ''}" onclick="pickIcon('${ic}', this)">${content}</div>`;
+        }).join('');
+    }
+
+    function pickIcon(ic, el) {
+        selectedIcon = ic;
+        document.getElementById('customIcon').value = '';
+        document.querySelectorAll('.icon-option').forEach(e => e.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    // ===== CRUD =====
+    function saveItem() {
+        const name = document.getElementById('itemName').value.trim();
+        const url = document.getElementById('itemUrl').value.trim();
+        const desc = document.getElementById('itemDesc').value.trim();
+        const cat = document.getElementById('itemCat').value;
+        const size = document.getElementById('itemSize').value.trim();
+        const isVip = document.getElementById('itemVip').checked;
+        const customIcon = document.getElementById('customIcon').value.trim();
+        const editId = document.getElementById('editId').value;
+        
+        const finalIcon = customIcon ? customIcon : selectedIcon;
+
+        if (!name || !url) { toast('Заполни название и ссылку!', 'error'); return; }
+
+        const isLink = currentView === 'links';
+        const targetArray = isLink ? data.links : data.items;
+
+        if (editId) {
+            const item = targetArray.find(i => i.id === editId);
+            if (item) {
+                item.name = name; item.url = url; item.description = desc; item.icon = finalIcon; item.isVip = isVip;
+                if (!isLink) { item.category = cat; item.size = size; }
+            }
+            toast('Обновлено ✅', 'success');
+        } else {
+            const newItem = { id: (isLink ? 'link_' : 'item_') + Date.now(), name, url, description: desc, icon: finalIcon, isVip, addedAt: new Date().toISOString() };
+            if (!isLink) { newItem.category = cat; newItem.size = size; }
+            targetArray.push(newItem);
+            toast('Добавлено ✅', 'success');
+        }
+
+        save(); closeAddModal(); renderCategories(); renderItems();
+    }
+
+    function editItem(id, isLink) {
+        const targetArray = isLink ? data.links : data.items;
+        const item = targetArray.find(i => i.id === id);
+        if (!item) return;
+        
+        document.getElementById('modalTitle').textContent = '✎ Редактировать';
+        document.getElementById('itemName').value = item.name;
+        document.getElementById('itemUrl').value = item.url;
+        document.getElementById('itemDesc').value = item.description || '';
+        document.getElementById('itemSize').value = item.size || '';
+        document.getElementById('itemVip').checked = !!item.isVip;
+        document.getElementById('editId').value = item.id;
+        
+        if (ICONS.includes(item.icon)) {
+            selectedIcon = item.icon;
+            document.getElementById('customIcon').value = '';
+        } else {
+            selectedIcon = '';
+            document.getElementById('customIcon').value = item.icon || '';
+        }
+
+        populateCatSelect();
+        if (!isLink && item.category) document.getElementById('itemCat').value = item.category;
+        
+        document.getElementById('fgCat').classList.toggle('hidden', isLink);
+        document.getElementById('fgSize').classList.toggle('hidden', isLink);
+
+        renderIconPicker();
+        document.getElementById('addModal').classList.add('open');
+    }
+
+    function deleteItem(id, isLink) {
+        if (!confirm('Удалить эту запись?')) return;
+        if (isLink) {
+            data.links = data.links.filter(i => i.id !== id);
+        } else {
+            data.items = data.items.filter(i => i.id !== id);
+        }
+        save(); renderCategories(); renderItems();
+        toast('Удалено', 'info');
+    }
+
+    // ===== CATEGORIES =====
+    function renderCatManager() {
+        document.getElementById('catList').innerHTML = data.categories.map(c => `
+            <div class="cat-item">${escHtml(c)} <button class="remove-cat" onclick="removeCategory('${c.replace(/'/g,"\\'")}')">✕</button></div>
+        `).join('');
+    }
+
+    function addCategory() {
+        const input = document.getElementById('newCatName');
+        const name = input.value.trim();
+        if (!name) return;
+        if (data.categories.includes(name)) { toast('Уже есть', 'error'); return; }
+        data.categories.push(name);
+        save(); input.value = '';
+        renderCatManager(); renderCategories();
+        toast('Категория добавлена', 'success');
+    }
+
+    function removeCategory(name) {
+        const cnt = data.items.filter(i => i.category === name).length;
+        if (cnt > 0) { toast(`Нельзя — ${cnt} файл(ов) в категории`, 'error'); return; }
+        data.categories = data.categories.filter(c => c !== name);
+        save(); renderCatManager(); renderCategories();
+        toast('Удалена', 'info');
+    }
+
+    // ===== IMPORT / EXPORT =====
+    function exportData() {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'download-hub-backup.json'; a.click(); URL.revokeObjectURL(a.href);
+        toast('Экспорт готов ⭱', 'success');
+    }
+
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const imp = JSON.parse(e.target.result);
+                if (imp.categories && imp.items) { data = imp; save(); renderCategories(); renderItems(); toast('Импорт ✅', 'success'); }
+                else toast('Неверный формат', 'error');
+            } catch { toast('Ошибка чтения', 'error'); }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    // ===== UTILS =====
+    function escHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+    function toast(msg, type = 'info') {
+        const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => { t.style.transition = 'opacity 0.3s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+    }
+
+    // Close modals on overlay
+    document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+
+    // ===== INIT =====
+    renderCategories();
+    updateAuthUI();
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
