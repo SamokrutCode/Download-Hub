@@ -928,6 +928,23 @@
         <div class="empty-state" id="favoritesEmpty" style="display:none;">
             <h3>Пока нет избранного</h3>
             <p>Нажимай на звёздочку возле файлов/ссылок, чтобы добавить их сюда</p>
+        </div>
+
+        <!-- Cloud Sync Panel -->
+        <div class="panel-card" style="margin-top: 30px;">
+            <h2>☁️ Облачная синхронизация</h2>
+            <p style="color:var(--text-dim); margin-bottom:15px;">Синхронизируй сайт между компьютерами через GitHub Gist.</p>
+            <div style="display:flex; flex-direction:column; gap:10px; max-width: 450px;">
+                <input type="password" id="syncToken" placeholder="GitHub Token (PAT)" style="padding:10px; background:rgba(10,10,10,0.8); border:1px solid var(--border); border-radius:10px; color:#fff;">
+                <input type="text" id="syncGistId" placeholder="Gist ID" style="padding:10px; background:rgba(10,10,10,0.8); border:1px solid var(--border); border-radius:10px; color:#fff;">
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button class="btn btn-primary" onclick="saveSyncSettings()" style="flex:1;">💾 Сохранить</button>
+                    <button class="btn btn-secondary" onclick="pullFromCloud()" style="flex:1;" id="btnPull">⬇ Загрузить</button>
+                    <button class="btn btn-secondary" onclick="pushToCloud()" style="flex:1;" id="btnPush">⬆ Отправить</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Admin Panel (Inside Profile) -->
         <div class="panel-card hidden" id="adminPanelInsideProfile" style="margin-top: 30px;">
             <h2>⚙ Управление пользователями</h2>
@@ -1392,6 +1409,11 @@
                 return generateCardHtml(item, idx, isLink);
             }).join('');
         }
+        
+        // Load sync settings
+        const sync = JSON.parse(localStorage.getItem('downloadHubSync') || '{}');
+        document.getElementById('syncToken').value = sync.token || '';
+        document.getElementById('syncGistId').value = sync.gistId || '';
     }
 
     function toggleFavorite(id) {
@@ -1697,7 +1719,102 @@
         reader.readAsText(file);
         event.target.value = '';
     }
+    // ===== CLOUD SYNC LOGIC =====
+    function saveSyncSettings() {
+        const token = document.getElementById('syncToken').value.trim();
+        const gistId = document.getElementById('syncGistId').value.trim();
+        localStorage.setItem('downloadHubSync', JSON.stringify({ token, gistId }));
+        toast('Настройки сохранены! 💾', 'success');
+    }
 
+    async function pullFromCloud() {
+        const sync = JSON.parse(localStorage.getItem('downloadHubSync') || '{}');
+        if (!sync.token || !sync.gistId) return toast('Введите Token и Gist ID', 'error');
+        
+        try {
+            const btn = document.getElementById('btnPull');
+            btn.textContent = '⏳ Загрузка...';
+            
+            const res = await fetch(`https://api.github.com/gists/${sync.gistId}`, {
+                headers: { 'Authorization': `token ${sync.token}` }
+            });
+            if (!res.ok) throw new Error('Ошибка доступа');
+            const gist = await res.json();
+            
+            if (gist.files['data.json']) {
+                localStorage.setItem('downloadHub', gist.files['data.json'].content);
+                data = JSON.parse(gist.files['data.json'].content);
+            }
+            if (gist.files['auth.json']) {
+                localStorage.setItem('downloadHubAuth', gist.files['auth.json'].content);
+                authData = JSON.parse(gist.files['auth.json'].content);
+            }
+            
+            toast('Данные загружены из облака! ☁️', 'success');
+            renderCategories(); renderItems();
+            if (currentView === 'profile') {
+                renderProfile();
+                updateAuthUI();
+            }
+            
+        } catch (e) {
+            toast('Ошибка загрузки: ' + e.message, 'error');
+        } finally {
+            document.getElementById('btnPull').textContent = '⬇ Загрузить';
+        }
+    }
+
+    async function pushToCloud() {
+        saveSyncSettings(); // auto save inputs
+        const sync = JSON.parse(localStorage.getItem('downloadHubSync') || '{}');
+        if (!sync.token) return toast('Введите GitHub Token', 'error');
+        
+        try {
+            const btn = document.getElementById('btnPush');
+            btn.textContent = '⏳ Отправка...';
+            
+            const payload = {
+                description: "Download Hub Cloud Sync Data",
+                public: false,
+                files: {
+                    'data.json': { content: JSON.stringify(data) },
+                    'auth.json': { content: JSON.stringify(authData) }
+                }
+            };
+            
+            let url = 'https://api.github.com/gists';
+            let method = 'POST';
+            
+            if (sync.gistId) {
+                url += `/${sync.gistId}`;
+                method = 'PATCH';
+            }
+            
+            const res = await fetch(url, {
+                method: method,
+                headers: { 
+                    'Authorization': `token ${sync.token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            if (!res.ok) throw new Error('Проверьте токен или Gist ID');
+            
+            const gist = await res.json();
+            
+            if (!sync.gistId) {
+                document.getElementById('syncGistId').value = gist.id;
+                localStorage.setItem('downloadHubSync', JSON.stringify({ token: sync.token, gistId: gist.id }));
+            }
+            
+            toast('Отправлено в облако! ☁️', 'success');
+        } catch (e) {
+            toast('Ошибка: ' + e.message, 'error');
+        } finally {
+            document.getElementById('btnPush').textContent = '⬆ Отправить';
+        }
+    }
     // ===== UTILS =====
     function escHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
 
